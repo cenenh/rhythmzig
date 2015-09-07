@@ -1,0 +1,67 @@
+package com.sgen.rp.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.json.simple.JSONObject;
+
+import com.sgen.DAO.UsersDAO;
+import com.sgen.DTO.UsersDTO;
+import com.sgen.util.JsonUtil;
+import com.sgen.util.ResultStatus;
+
+public class CheckDeleteUser extends HttpServlet {
+	
+	private static final long serialVersionUID = 1L;
+       
+	// 관리자가 맞는지 확인 Check !
+	
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+			throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		//Json 파싱 하긔~~~~
+		
+		String userCode = request.getParameter("userCode");
+		String deviceCode = request.getParameter("deviceCode");
+		String result = null;
+		UsersDTO usersDTO = new UsersDTO();
+		UsersDAO usersDAO = new UsersDAO();
+		
+		JSONObject jsonObj = new JSONObject();
+		
+		usersDTO.setUserCode(userCode);
+		usersDTO.setDeviceCode(deviceCode);
+		result = usersDAO.getAdminUserCode(usersDTO);
+		
+		if(result.equals(userCode))
+		{
+			System.out.println(usersDTO.getUserCode() 
+					+ " is Admin user. CAN NOT DELETE");
+			jsonObj = JsonUtil.CAN_NOT_DELETE_USER();
+		}
+		else if(!result.equals(userCode))
+		{
+			System.out.println(usersDTO.getUserCode() 
+					+" is not Admin user. CAN DELETE");
+			jsonObj = JsonUtil.CAN_DELETE_USER();
+		}
+		else if("".equals(result)) //NULL일 경우..
+		{
+			System.out.println(ResultStatus.INVALIDUSER);
+			jsonObj = JsonUtil.UNKNOWN_USER();
+		}
+		
+		response.setContentType("application/json; charset=UTF-8");
+		PrintWriter out = response.getWriter();
+		System.out.println(jsonObj);
+		out.print(jsonObj);
+		out.close();
+
+	}
+}

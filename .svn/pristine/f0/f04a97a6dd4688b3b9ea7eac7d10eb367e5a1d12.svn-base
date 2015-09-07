@@ -1,0 +1,46 @@
+package com.sgen.app.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.sgen.util.JsonUtil;
+import com.sgen.util.ResultStatus;
+
+public class ChangeName extends HttpServlet {
+
+	@Override
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		PrintWriter out = response.getWriter();
+		response.setContentType("application/json; charset=UTF-8");
+
+		JSONObject jsonObj = new JSONObject();
+		JSONObject jsonObjResultStatus = new JSONObject();
+
+		try {
+			int status = ResultStatus.OK;
+			if (status == ResultStatus.OK) {
+				jsonObj = JsonUtil.makeJsonResponse("ok", jsonObjResultStatus);
+			} else if (status == ResultStatus.INVALIDUSER) {
+				jsonObjResultStatus.put("message", "invalid user");
+				jsonObj = JsonUtil.makeJsonResponse("invalidUser", jsonObjResultStatus);
+			}
+
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		out.print(jsonObj);
+		out.close();
+
+	}
+}

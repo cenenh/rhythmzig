@@ -1,0 +1,52 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<script src="//code.jquery.com/jquery.js"></script>
+<script type="text/javascript">
+
+function insertAction2()
+{
+	var mForm = document.insert;
+	var obj = new Object();
+	
+	obj.deviceStatus = mForm.deviceStatus.value;
+	obj.deviceCode = mForm.deviceCode.value;
+	obj.userCode = mForm.userCode.value;
+	obj.startDate = mForm.startDate.value;
+	obj.endDate = mForm.endDate.value;
+	
+	alert(obj.userCode)
+	var jsonData = JSON.stringify(obj);
+
+	var request = $.ajax({
+		url : "/getEnterLog",
+		type : "POST",
+		data : jsonData,
+		dataType : "json",
+		success : function (data) {
+			var ob=data;
+			console.log(ob);
+		},
+		error : function(data){
+			alert("error : " + data);
+		}
+	});
+}
+</script>
+<title>${USER.userCode}</title>
+</head>
+<body>
+	<form name="insert" action="getEnterLog" method="POST">
+		deviceStatus : <input type="text" id="deviceStatus" /><br/>
+		deviceCode :<input type="text" id="deviceCode" /><br/>
+		userCode :<input type="text" id="userCode" /><br/>
+		startDate :<input type="text" id="startDate" /><br/>
+		endDate :<input type="text" id="endDate" /><br/> 
+		<input type="button" value="getEnterLog" onClick="insertAction2()"/>
+	</form>
+</body>
+</html>

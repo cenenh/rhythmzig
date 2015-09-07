@@ -1,0 +1,42 @@
+package com.sgen.util;
+
+import java.io.BufferedReader;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class JsonUtil {
+	private static JSONObject jsonObj = new JSONObject();
+	private static JSONArray jsonArr = new JSONArray();
+
+	public static JSONObject makeJsonResponse(String str_status,
+			JSONObject jsonObjResultStatus) {
+		try {
+			jsonObj.put("status", str_status);
+			jsonArr.put(jsonObjResultStatus);
+			jsonObj.put("result", jsonArr);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return jsonObj;
+	}
+
+	public static String getJsonFromAndroid(HttpServletRequest request) {
+		// TODO Auto-generated method stub
+		StringBuffer sb = new StringBuffer();
+		String line = null;
+		try {
+			BufferedReader reader = request.getReader();
+			while ((line = reader.readLine()) != null)
+				sb.append(line);
+		} catch (Exception e) { /* report an error */
+			e.printStackTrace();
+		}
+		
+		return sb.toString();
+	}
+}

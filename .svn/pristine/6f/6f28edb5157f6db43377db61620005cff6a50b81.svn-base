@@ -1,0 +1,53 @@
+package com.sgen.DTO;
+
+import java.util.Date;
+
+public class LogsDTO {
+	private int enterlogIdx;
+	private String userCode;
+	private String deviceCode;
+	private int deviceStatus;
+	private Date enterTime;
+	private java.sql.Timestamp enterTimeTest;
+	
+	
+	public int getEnterlogIdx() {
+		return enterlogIdx;
+	}
+	public void setEnterlogIdx(int enterlogIdx) {
+		this.enterlogIdx = enterlogIdx;
+	}
+	public String getUserCode() {
+		return userCode;
+	}
+	public void setUserCode(String userCode) {
+		this.userCode = userCode;
+	}
+	public String getDeviceCode() {
+		return deviceCode;
+	}
+	public void setDeviceCode(String deviceCode) {
+		this.deviceCode = deviceCode;
+	}
+	public int getDeviceStatus() {
+		return deviceStatus;
+	}
+	public void setDeviceStatus(int deviceStatus) {
+		this.deviceStatus = deviceStatus;
+	}
+	public Date getEnterTime() {
+		return enterTime;
+	}
+	public void setEnterTime(Date enterTime) {
+		this.enterTime = enterTime;
+	}
+	public java.sql.Timestamp getEnterTimeTest()
+	{
+		return this.enterTimeTest;
+	}
+	public void setEnterTimeTest(java.sql.Timestamp enterTimeTest)
+	{
+		this.enterTimeTest = enterTimeTest;
+	}
+
+}

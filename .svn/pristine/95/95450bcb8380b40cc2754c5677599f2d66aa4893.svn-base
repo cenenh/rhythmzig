@@ -1,0 +1,9 @@
+package com.sgen.util;
+
+public class ResultStatus {
+	public static final int OK = 1;
+	public static final int INVALIDUSER = 2;
+	public static final int INVALIDDEVICE = 3;
+	public static final int INVALIDDATE = 4;
+	public static final int INVALIDMODE = 5;
+}

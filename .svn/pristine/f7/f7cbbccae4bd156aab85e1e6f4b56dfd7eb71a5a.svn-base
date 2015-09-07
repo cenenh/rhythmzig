@@ -1,0 +1,7 @@
+package com.sgen.DAO;
+
+import com.sgen.DTO.DeviceDTO;
+
+public class DeviceDAO {
+
+}

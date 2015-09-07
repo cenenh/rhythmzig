@@ -1,0 +1,39 @@
+package com.sgen.util;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class JsonUtil {
+	public static JSONObject makeErrorObject(JSONObject jsonObj,
+			String status) {
+		// TODO Auto-generated method stub
+		JSONObject jsonMessageObj = new JSONObject();
+		JSONArray jsonResultArr = new JSONArray();
+
+		try {
+			jsonMessageObj.put("message", status);
+			jsonResultArr.put(jsonMessageObj);
+			jsonObj.put("status", status);
+			jsonObj.put("result", jsonResultArr);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return jsonObj;
+	}
+	
+	public static JSONObject makeSuccessObject(){
+		JSONObject jsonObj = new JSONObject();
+		JSONArray jsonResultArr = new JSONArray();
+		try {
+			jsonObj.put("status", "ok");
+			jsonObj.put("result", jsonResultArr);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return jsonObj;
+	}
+}

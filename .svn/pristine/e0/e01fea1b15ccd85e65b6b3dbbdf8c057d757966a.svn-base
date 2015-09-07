@@ -1,0 +1,99 @@
+package com.sgen.app.action;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.UUID;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.sgen.DAO.UsersDAO;
+import com.sgen.DTO.UsersDTO;
+import com.sgen.util.JsonUtil;
+import com.sgen.util.ResultStatus;
+
+/**
+ * Servlet implementation class Login
+ */
+@WebServlet("/Login")
+public class Login extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	private UsersDTO usersDTO;
+	private UsersDAO usersDAO;
+	
+	public Login() {
+		// TODO Auto-generated constructor stub
+		usersDTO = new UsersDTO();
+		usersDAO = new UsersDAO();
+	}
+
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		
+		//get json data from android
+		String requestJson = JsonUtil.getJsonFromAndroid(request);
+		System.out.println(requestJson);
+		JSONObject resJsonObj = new JSONObject();
+		
+	
+		try {
+			JSONObject reqJsonObj = new JSONObject(requestJson);
+			String userCode = reqJsonObj.getString("userCode");
+			String deviceCode = reqJsonObj.getString("deviceCode");
+			String sessionKey=	UUID.randomUUID().toString();
+			
+			System.out.println("deviceCode : "+deviceCode);
+			System.out.println("userCode : "+userCode);
+			System.out.println("sessionKey : "+sessionKey);
+			System.out.println("----------------------------");
+			
+			usersDTO.setUserCode(userCode);
+			usersDTO.setDeviceCode(deviceCode);
+			usersDTO.setSessionKey(sessionKey);
+			
+			resJsonObj = usersDAO.login(usersDTO);
+			
+		} catch (JSONException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		PrintWriter out = response.getWriter();
+		response.setContentType("application/json; charset=UTF-8");
+
+		out.print(resJsonObj);
+		out.close();
+	}
+
+	private static String convertStreamToString(InputStream is) {
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+		StringBuilder sb = new StringBuilder();
+
+		String line = null;
+		try {
+			while ((line = reader.readLine()) != null) {
+				sb.append(line + "\n");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				is.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return sb.toString();
+	}
+}

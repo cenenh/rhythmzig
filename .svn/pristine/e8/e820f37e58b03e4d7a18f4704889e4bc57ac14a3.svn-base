@@ -1,0 +1,92 @@
+package com.sgen.app.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.sgen.DAO.UsersDAO;
+import com.sgen.DTO.UsersDTO;
+import com.sgen.gcm.GCMSender;
+import com.sgen.util.JsonUtil;
+import com.sgen.util.ResultStatus;
+
+public class Login extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		UsersDTO usersDTO = new UsersDTO();
+		UsersDAO usersDAO = new UsersDAO();
+
+		// for return result to android
+		JSONObject jsonObj = new JSONObject();
+		JSONObject jsonObjResultStatus = new JSONObject();
+		JSONArray jsonArrResultStatus = new JSONArray();
+
+		HttpSession session;
+		String userCode = request.getParameter("userCode");
+		String deviceCode = request.getParameter("deviceCode");
+		String regId = request.getParameter("regId");
+
+		usersDTO.setUserCode(userCode);
+		usersDTO.setDeviceCode(deviceCode);
+		usersDTO.setRegId(regId);
+		
+		System.out.println("regId : "+regId);
+
+		usersDTO = usersDAO.login(usersDTO);
+
+		try {
+			if (usersDTO.getUserCode().equals(ResultStatus.NOSUCHDEVICE)) {
+				// jsonObjResultStatus.put("message", "There is no such user.");
+				// jsonArrResultStatus.put(jsonObjResultStatus);
+				// jsonResponseObj.put("status", "noSuchUser");
+				// jsonResponseObj.put("result", jsonArrResultStatus);
+				jsonObj = JsonUtil.makeErrorObject(jsonObj,
+						ResultStatus.NOSUCHDEVICE);
+			} else if (usersDTO.getUserCode().equals(ResultStatus.NOSUCHUSER)) {
+				// jsonObjResultStatus.put("message",
+				// "There is no such device.");
+				// jsonArrResultStatus.put(jsonObjResultStatus);
+				// jsonObj.put("status", "noSuchDevice");
+				// jsonObj.put("result", jsonArrResultStatus);
+				jsonObj = JsonUtil.makeErrorObject(jsonObj,
+						ResultStatus.NOSUCHUSER);
+			} else {
+				// login success
+				int result = usersDAO.registGCMId(usersDTO);
+
+				jsonObjResultStatus.put("isAdmin", true);
+				jsonObjResultStatus.put("userName", usersDTO.getUserName());
+				jsonArrResultStatus.put(jsonObjResultStatus);
+				jsonObj.put("status", "ok");
+				jsonObj.put("result", jsonArrResultStatus);
+
+				GCMSender
+						.sendLog("APA91bE5bLA32glrsibpmikkJo8gc8D4MOytz2oZK_deFliM7ca3s4pIZ3qVVvy6DhU_NrVFtSYFIeVkSAi42srcG_hasM5ZLWbhgOjCZVBf1Wh5lkw-G-ZKdfrbpz4owVbB5cA5IsE06hDcixcS5Z5Fwe57XCaeJg");
+
+				session = request.getSession();
+				session.setAttribute("USER", usersDTO);
+
+			}
+		} catch (JSONException e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+
+		PrintWriter out = response.getWriter();
+		response.setContentType("application/json; charset=UTF-8");
+		System.out.println(jsonObj);
+		out.print(jsonObj);
+		out.close();
+	}
+}

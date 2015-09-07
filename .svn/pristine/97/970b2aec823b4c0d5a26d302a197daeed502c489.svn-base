@@ -1,0 +1,39 @@
+package com.sgen.gcm;
+
+import java.io.IOException;
+
+import org.json.simple.JSONObject;
+
+import com.google.android.gcm.server.Message;
+import com.google.android.gcm.server.Result;
+import com.google.android.gcm.server.Sender;
+
+
+public class GCMSender{
+	//private String REGISTRATION_ID = "";//registration Id 입력
+    private final static String key = "AIzaSyDcYeIovs0atAE2Kop8FMcDT2iwq6kQDPw"; //GCM에서 발급받은 ApiKey를 입력
+    
+	public static void sendMessage(String REGISTRATION_ID,String message){
+		Sender sender = new Sender(key);
+		
+		Message msg = new Message.Builder().
+				addData(key, message).build();
+		
+		try {
+			Result result = sender.send(msg, REGISTRATION_ID, 3);
+			if(result.getMessageId()!=null){
+				System.out.println("send success");
+			} else {
+				String error =result.getErrorCodeName();
+				System.out.println("send fail : "+error);
+			}
+			
+			String msgId = result.getMessageId();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+}

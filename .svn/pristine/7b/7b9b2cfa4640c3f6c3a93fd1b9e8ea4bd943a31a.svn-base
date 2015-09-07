@@ -1,0 +1,144 @@
+package com.sgen.DAO;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.sgen.DTO.UsersDTO;
+import com.sgen.util.JDBCUtil;
+import com.sgen.util.JsonUtil;
+import com.sgen.util.ResultStatus;
+
+public class UsersDAO {
+	private final String LOGIN = "SELECT * FROM users WHERE userCode = ? ";
+	private final String CHANGENAME="UPDATE users SET userName = ? WHERE userCode = ?";
+	private final String GETUSERS = "SELECT * FROM users WHERE deviceCode = ? ";
+	
+	// 유저 코드가 잘못되었거나 디바이스 코드가 잘못되거나 둘 다 잘못되거나...
+	// 객체를 json으로 리턴...해야하네
+	public UsersDTO login(UsersDTO usersDTO) {
+		// TODO Auto-generated method stub
+		Connection conn = JDBCUtil.getConnection();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			pstmt = conn.prepareStatement(LOGIN);
+
+			int idx = 0;
+			pstmt.setString(++idx, usersDTO.getUserCode());
+
+			rs = pstmt.executeQuery();
+
+			
+			if (rs.next()) {
+				String userCode = rs.getString("userCode");
+				if (usersDTO.getUserCode().equals(userCode)) {
+					// 로그인 성공
+					//임시값들은 어떻게할지 생각해보기
+					usersDTO.setUserCode(rs.getString("userCode"));
+					usersDTO.setUserName(rs.getString("userName"));
+					usersDTO.setAdmin(rs.getBoolean("isAdmin"));
+					usersDTO.setDeviceCode(rs.getString("deviceCode"));
+				} else {
+					// 존재하지 않는 deviceCode
+					usersDTO.setUserCode(ResultStatus.NOSUCHDEVICE);
+				}
+			} else {
+				usersDTO.setUserCode(ResultStatus.NOSUCHUSER);
+			}
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return usersDTO;
+	}
+
+	public JSONObject changeName(UsersDTO usersDTO) {
+		// TODO Auto-generated method stub
+		Connection conn = JDBCUtil.getConnection();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		JSONObject jsonResponseObj = new JSONObject();
+		JSONObject jsonObjResultStatus = new JSONObject();
+		JSONArray jsonArrResultStatus = new JSONArray();
+		/*
+		 * 쿼리 완성 후 
+		try {
+			pstmt = conn.prepareStatement(CHANGENAME);
+			
+			int idx=0;
+			pstmt.setString(++idx, usersDTO.getUserName());
+			pstmt.setString(++idx, usersDTO.getUserCode());
+			
+			int result = pstmt.executeUpdate();
+			if(result == 1){
+				jsonArrResultStatus.put(jsonObjResultStatus);
+				jsonResponseObj.put("status", "ok");
+				jsonResponseObj.put("result", jsonArrResultStatus);
+			}else{
+				jsonObjResultStatus.put("message", "invalid user");
+				jsonArrResultStatus.put(jsonObjResultStatus);
+				jsonResponseObj.put("status", "invalidUser");
+				jsonResponseObj.put("result", jsonArrResultStatus);
+			}
+				
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		*/
+		jsonArrResultStatus.put(jsonObjResultStatus);
+		try {
+			jsonResponseObj.put("status", "ok");
+			jsonResponseObj.put("result", jsonArrResultStatus);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return jsonResponseObj;
+	}
+
+	public ArrayList<UsersDTO> getUsers(UsersDTO usersDTO) {
+		// TODO Auto-generated method stub
+		Connection conn = JDBCUtil.getConnection();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		ArrayList<UsersDTO> userlist = new ArrayList<UsersDTO>();
+		try {
+			pstmt = conn.prepareStatement(GETUSERS);
+			
+			pstmt.setString(1, usersDTO.getDeviceCode());
+			
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()){
+				UsersDTO user = new UsersDTO();
+				user.setUserName(rs.getString("userName"));
+				user.setUserCode(rs.getString("userCode"));
+				user.setAdmin(rs.getBoolean("isAdmin"));
+				
+				userlist.add(user);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return userlist;
+	}
+}

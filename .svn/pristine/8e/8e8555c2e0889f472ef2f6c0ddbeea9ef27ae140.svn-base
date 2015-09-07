@@ -1,0 +1,74 @@
+package com.sgen.app.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import com.sgen.DAO.UsersDAO;
+import com.sgen.DTO.UsersDTO;
+import com.sgen.gcm.GCMSender;
+import com.sgen.util.JsonUtil;
+import com.sgen.util.ResultStatus;
+
+public class Login extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		UsersDTO usersDTO = new UsersDTO();
+		UsersDAO usersDAO = new UsersDAO();
+
+		// for return result to android
+		JSONObject jsonObj = new JSONObject();
+		JSONObject jsonObjResultStatus = new JSONObject();
+		JSONArray jsonArrResultStatus = new JSONArray();
+
+		HttpSession session;
+		String userCode = request.getParameter("userCode");
+		String deviceCode = request.getParameter("deviceCode");
+		String regId = request.getParameter("regId");
+
+		usersDTO.setUserCode(userCode);
+		usersDTO.setDeviceCode(deviceCode);
+		usersDTO.setRegId(regId);
+
+		usersDTO = usersDAO.login(usersDTO);
+
+		if (usersDTO.getUserCode().equals(ResultStatus.NOSUCHDEVICE)) {
+			jsonObj = JsonUtil.makeErrorObject(jsonObj,
+					ResultStatus.NOSUCHDEVICE);
+		} else if (usersDTO.getUserCode().equals(ResultStatus.NOSUCHUSER)) {
+			jsonObj = JsonUtil
+					.makeErrorObject(jsonObj, ResultStatus.NOSUCHUSER);
+		} else {
+			// login success
+			int result = usersDAO.registGCMId(usersDTO);
+
+			jsonObjResultStatus.put("isAdmin", usersDTO.isAdmin());
+			jsonObjResultStatus.put("userName", usersDTO.getUserName());
+			jsonArrResultStatus.add(jsonObjResultStatus);
+			jsonObj.put("status", "ok");
+			jsonObj.put("result", jsonArrResultStatus);
+
+			GCMSender.sendLog(usersDTO.getRegId());
+
+			session = request.getSession();
+			session.setAttribute("USER", usersDTO);
+
+		}
+		
+		response.setContentType("application/json; charset=UTF-8");
+		PrintWriter out = response.getWriter();
+		System.out.println(jsonObj);
+		out.print(jsonObj);
+		out.close();
+	}
+}

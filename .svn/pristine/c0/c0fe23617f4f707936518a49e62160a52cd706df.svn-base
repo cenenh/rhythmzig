@@ -1,0 +1,42 @@
+package com.sgen.DAO;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import com.sgen.DTO.DeviceDTO;
+import com.sgen.util.JDBCUtil;
+
+public class DeviceDAO {
+	
+	private final String GET_DEVICE_LIST = "select * from device;";
+	
+	public ArrayList<DeviceDTO> getDeviceList(DeviceDTO deviceDTO) 
+	{
+		
+		ArrayList<DeviceDTO> deviceList = new ArrayList<DeviceDTO>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			Connection conn = JDBCUtil.getConnection();
+			pstmt = conn.prepareStatement(GET_DEVICE_LIST);
+			rs = pstmt.executeQuery();
+			
+			while(rs.next())
+			{
+				DeviceDTO dto = new DeviceDTO();
+				dto.setDeviceCode(rs.getString("deviceCode"));
+				dto.setDeviceStatus(rs.getInt("deviceStatus"));
+				System.out.println(dto.getDeviceCode() + dto.getDeviceStatus());
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			
+		}
+		return deviceList;
+	}	
+
+}

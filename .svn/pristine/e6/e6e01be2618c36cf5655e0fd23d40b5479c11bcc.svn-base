@@ -1,0 +1,12 @@
+package com.sgen.util;
+
+public class ResultStatus {
+	public static final String OK = "ok";
+	public static final String INVALIDUSER = "invalidUser";
+	public static final int INVALIDDEVICE = 3;
+	public static final int INVALIDDATE = 4;
+	public static final int INVALIDMODE = 5;
+	public static final String NOSUCHUSER = "noSuchUser";
+	public static final String NOSUCHDEVICE = "noSuchDevice";
+	public static final String invalidNickname = "invalidNickname";
+}

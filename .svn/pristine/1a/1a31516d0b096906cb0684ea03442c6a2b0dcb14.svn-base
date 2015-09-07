@@ -1,0 +1,64 @@
+package com.sgen.app.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import com.sgen.DAO.DeviceDAO;
+import com.sgen.DTO.DeviceDTO;
+import com.sgen.DTO.UsersDTO;
+import com.sgen.util.JsonUtil;
+import com.sgen.util.ResultStatus;
+
+public class SetDeviceStatus extends HttpServlet {
+
+	@Override
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		DeviceDAO deviceDAO = new DeviceDAO();
+		DeviceDTO deviceDTO = new DeviceDTO();
+		UsersDTO usersDTO = new UsersDTO();
+		HttpSession session = request.getSession();
+		JSONObject jsonObj = new JSONObject();
+
+		JSONArray jsonResultArr = new JSONArray();
+
+		usersDTO = (UsersDTO) session.getAttribute("USER");
+		String deviceStatus = request.getParameter("deviceStatus");
+
+		if (usersDTO != null) {
+			deviceDTO.setDeviceCode(usersDTO.getDeviceCode());
+			if(deviceStatus.equals("normal"))
+				deviceDTO.setDeviceStatus(ResultStatus.DEVICE_NORMAL_STATUS);
+			else
+				deviceDTO.setDeviceStatus(ResultStatus.DEVICE_TRAVEL_STATUS);
+
+			int result = deviceDAO.setDeviceStatus(deviceDTO);
+			if (result != 0) {
+				jsonObj.put("status", "ok");
+				jsonObj.put("result", jsonResultArr);
+			} else {
+				jsonObj = JsonUtil.makeErrorObject(jsonObj,
+						ResultStatus.NOSUCHDEVICE);
+			}
+
+		} else {
+			jsonObj = JsonUtil.makeErrorObject(jsonObj,
+					ResultStatus.INVALIDUSER);
+		}
+		
+		response.setContentType("application/json; charset=UTF-8");
+		PrintWriter out = response.getWriter();
+		out.print(jsonObj);
+		out.close();
+	}
+
+}

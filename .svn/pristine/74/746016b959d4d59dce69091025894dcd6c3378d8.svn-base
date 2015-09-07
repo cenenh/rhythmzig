@@ -1,0 +1,55 @@
+<%@page import="java.util.ArrayList"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ page import="com.sgen.DAO.*"%>
+<%@ page import="com.sgen.DTO.*" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
+<title>TEST</title>
+</head>
+<body>
+	<%
+		int result = 0;
+		UsersDAO usersDAO = new UsersDAO();
+		UsersDTO usersDTO = new UsersDTO();
+		ArrayList<UsersDTO> userList = new ArrayList<UsersDTO>();
+		
+		usersDTO.setDeviceCode("123412341234");
+		userList = usersDAO.getUsers(usersDTO); 
+	%>
+	<center>
+	<TABLE border="1" cellspacing="1" cellpadding="1" width="1000">
+		<tr>
+			<td><b>userCode</b></td>
+			<td><b>userName</b></td>
+			<td><b>deviceCode</b></td>
+			<td><b>Administrator</b></td>
+		</tr>
+		<%
+			for(int i = 0; i < userList.size(); i++)
+			{
+		%>	
+			<tr>
+			<td><%=userList.get(i).getUserCode()%></td>	
+			<td><%=userList.get(i).getUserName()%></td>	
+			<td><%=userList.get(i).getDeviceCode()%></td>
+			<td>
+				<%	if (userList.get(i).isAdmin() == true)
+					{
+				%>
+					<%= "Admin" %>	
+				<% 
+					}
+				%>
+			</td>
+			</tr>			
+		<%
+			}
+		%>
+			
+	</TABLE>
+</center>
+</body>
+</html>

@@ -1,0 +1,126 @@
+package com.sgen.app.action;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.sgen.util.JsonUtil;
+import com.sgen.util.ResultStatus;
+
+/**
+ * Servlet implementation class Login
+ */
+@WebServlet("/Login")
+public class Login extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		
+		//read json data from android
+		StringBuffer jb = new StringBuffer();
+		String line = null;
+		try {
+			BufferedReader reader = request.getReader();
+			while ((line = reader.readLine()) != null)
+				jb.append(line);
+		} catch (Exception e) { /* report an error */
+		}
+		try {
+			JSONObject jsonObj = new JSONObject(jb.toString());
+			String user_key = jsonObj.getString("userKey");
+			String doorlock_key = jsonObj.getString("doorlockKey");
+			System.out.println("userkey"+user_key);
+		} catch (JSONException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+
+	
+		
+		
+
+		PrintWriter out = response.getWriter();
+		response.setContentType("application/json; charset=UTF-8");
+		JSONObject jsonResponseObj = new JSONObject();
+		JSONObject jsonObjResultStatus = new JSONObject();
+
+		try {
+			// responserJsonObj = new JSONObject(login_request);
+			// String doorlock_key = jsonObj.getString("doorlock_key");
+			// String user_key = jsonObj.getString("user_key");
+			//
+			// System.out.println(doorlock_key);
+			// DB에 넣고
+
+			// 값을 가져 와서
+			int status = ResultStatus.OK;
+			switch (status) {
+			case ResultStatus.OK:
+				jsonObjResultStatus.put("sessionKey",
+						"Defiefls19293-rkdkfne-1k2nlfks");
+				jsonObjResultStatus.put("isAdmin", true);
+				jsonObjResultStatus.put("name", "gilyoung");
+				jsonResponseObj = JsonUtil.makeJsonResponse("ok",
+						jsonObjResultStatus);
+				break;
+
+			case ResultStatus.INVALIDUSER:
+				jsonObjResultStatus.put("message", "invalid user");
+				jsonResponseObj = JsonUtil.makeJsonResponse("invalidUser",
+						jsonObjResultStatus);
+				break;
+
+			case ResultStatus.INVALIDDEVICE:
+				jsonObjResultStatus.put("message", "invalidDevice");
+				jsonResponseObj = JsonUtil.makeJsonResponse("invalidDevice",
+						jsonObjResultStatus);
+				break;
+
+			default:
+				break;
+			}
+
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		out.print(jsonResponseObj);
+		out.close();
+	}
+
+	private static String convertStreamToString(InputStream is) {
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+		StringBuilder sb = new StringBuilder();
+
+		String line = null;
+		try {
+			while ((line = reader.readLine()) != null) {
+				sb.append(line + "\n");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				is.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return sb.toString();
+	}
+}

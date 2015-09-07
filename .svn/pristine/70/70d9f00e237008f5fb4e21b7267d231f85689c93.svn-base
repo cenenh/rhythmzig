@@ -1,0 +1,24 @@
+package com.sgen.util;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+
+public class JsonUtil {
+	private static JSONObject jsonObj = new JSONObject();
+	private static JSONArray jsonArr = new JSONArray();
+	
+	public static JSONObject makeJsonResponse(String str_status, JSONObject jsonObjResultStatus){
+		try {
+			jsonObj.put("status", str_status);
+			jsonArr.put(jsonObjResultStatus);
+			jsonObj.put("result", jsonArr);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return jsonObj;
+	}
+}

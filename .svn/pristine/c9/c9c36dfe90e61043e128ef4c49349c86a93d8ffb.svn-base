@@ -1,0 +1,28 @@
+package com.sgen.util;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+public class JsonUtil {
+	public static JSONObject makeErrorObject(JSONObject jsonObj, String status) {
+		// TODO Auto-generated method stub
+		JSONObject jsonMessageObj = new JSONObject();
+		JSONArray jsonResultArr = new JSONArray();
+
+		jsonMessageObj.put("message", status);
+		jsonResultArr.add(jsonMessageObj);
+		jsonObj.put("status", status);
+		jsonObj.put("result", jsonResultArr);
+
+		return jsonObj;
+	}
+
+	public static JSONObject makeSuccessObject() {
+		JSONObject jsonObj = new JSONObject();
+		JSONArray jsonResultArr = new JSONArray();
+		jsonObj.put("status", "ok");
+		jsonObj.put("result", jsonResultArr);
+
+		return jsonObj;
+	}
+}

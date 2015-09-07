@@ -1,0 +1,90 @@
+package com.sgen.app.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.sgen.DAO.UsersDAO;
+import com.sgen.DTO.UsersDTO;
+import com.sgen.util.JsonUtil;
+
+public class ChangeName extends HttpServlet {
+
+	@Override
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		UsersDTO usersDTO = new UsersDTO();
+		UsersDAO usersDAO = new UsersDAO();
+		HttpSession session = request.getSession();
+		
+		String requestJson = JsonUtil.getJsonFromAndroid(request);
+		int result;
+		
+		PrintWriter out = response.getWriter();
+		response.setContentType("application/json; charset=UTF-8");
+		
+		JSONObject reqJsonObj;
+		JSONObject jsonObj = new JSONObject();
+		JSONArray jsonResultArr = new JSONArray();
+		JSONObject jsonMessageArr = new JSONObject();
+		
+		usersDTO = (UsersDTO) session.getAttribute("USER");
+		String userCode = null, userName = null;
+		
+		if(usersDTO != null) {
+			try {
+				reqJsonObj = new JSONObject(requestJson);
+				userCode = reqJsonObj.getString("userCode");
+				userName = reqJsonObj.getString("userName");
+				
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			usersDTO.setUserCode(userCode);
+			usersDTO.setUserName(userName);
+			
+			result = usersDAO.changeName(usersDTO);
+			try{
+				
+				if(result == 1){
+					jsonObj.put("status", "ok");
+					jsonObj.put("result", jsonResultArr);
+				} else {
+					jsonMessageArr.put("message", "noSuchUser");
+					jsonResultArr.put(jsonMessageArr);
+					jsonObj.put("status", "error");
+					jsonObj.put("result", jsonResultArr);
+				}
+				
+			} catch (JSONException e){
+				e.printStackTrace();
+			}
+			
+		} else {
+			try {
+				jsonMessageArr.put("message", "invalidUser");
+				jsonResultArr.put(jsonMessageArr);
+				jsonObj.put("status", "error");
+				jsonObj.put("result", jsonResultArr);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			
+		}
+		out.print(jsonObj);
+		out.close();
+
+	}
+}

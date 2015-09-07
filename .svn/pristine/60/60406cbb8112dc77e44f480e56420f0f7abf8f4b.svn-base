@@ -1,0 +1,81 @@
+package com.sgen.app.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.sgen.DAO.*;
+import com.sgen.DTO.LogsDTO;
+import com.sgen.DTO.UsersDTO;
+import com.sgen.util.JsonUtil;
+import com.sgen.util.ResultStatus;
+
+
+public class GetEnterLog extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		int deviceStatus = 0;
+		LogsDTO dto = new LogsDTO();
+		LogsDAO dao = new LogsDAO();
+		UsersDTO usersDTO = new UsersDTO();
+		HttpSession session = request.getSession();
+		JSONObject jsonObj = new JSONObject();
+		JSONArray jsonResultArr = new JSONArray();
+		JSONObject jsonMessageObj = new JSONObject();
+
+		usersDTO = (UsersDTO) session.getAttribute("USER");
+		String mode = request.getParameter("mode");
+		String startDate = request.getParameter("startDate");
+		String endDate = request.getParameter("endDate");
+		String userCode = request.getParameter("userCode");
+		
+		if(mode.equals(ResultStatus.TRAVEL))
+		{
+			deviceStatus = ResultStatus.DEVICE_TRAVEL_STATUS;
+		}
+		else if(mode.equals(ResultStatus.NORMAL))
+		{
+			deviceStatus = ResultStatus.DEVICE_NORMAL_STATUS;
+		}
+		dto.setUserCode(userCode);
+		dto.setDeviceStatus(deviceStatus);
+		
+		if (usersDTO != null) // Yes Session...	
+		{ 
+			dto.setDeviceCode(usersDTO.getDeviceCode());
+			System.out.println("Request Log ID : " + usersDTO.getUserCode());
+			System.out.println("Request Log Name : "+ usersDTO.getUserName());
+			System.out.println("Request Log Device Code : "+ usersDTO.getDeviceCode());
+		
+			ArrayList<LogsDTO> LogsList = new ArrayList<LogsDTO>();
+			LogsList = dao.getLogs(dto, startDate, endDate);
+			ArrayList<JSONObject> jsonLogsList = new ArrayList<JSONObject>();
+			
+		}
+		else{ // No Session.
+			System.out.println("No session");
+			jsonObj = JsonUtil.makeErrorObject(jsonObj, ResultStatus.INVALIDUSER);
+		}
+		PrintWriter out = response.getWriter();
+		response.setContentType("application/json; charset=UTF-8");
+		out.print(jsonObj);
+		out.close();
+		
+	}
+
+}

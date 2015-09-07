@@ -1,0 +1,101 @@
+package com.sgen.DAO;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.sgen.DTO.UsersDTO;
+import com.sgen.util.JDBCUtil;
+import com.sgen.util.JsonUtil;
+import com.sgen.util.ResultStatus;
+
+public class UsersDAO {
+	private final String LOGIN = "SELECT * FROM users WHERE deviceCode = ? ";
+
+	private Connection conn = null;
+	private PreparedStatement pstmt = null;
+	private ResultSet rs = null;
+
+	// 유저 코드가 잘못되었거나 디바이스 코드가 잘못되거나 둘 다 잘못되거나...
+	// 객체를 json으로 리턴...해야하네
+	public JSONObject login(UsersDTO usersDTO) {
+		// TODO Auto-generated method stub
+		conn = JDBCUtil.getConnection();
+		JSONObject jsonResponseObj = new JSONObject();
+		JSONObject jsonObjResultStatus = new JSONObject();
+		System.out.println("userCode : " +usersDTO.getUserCode());
+		try {
+			pstmt = conn.prepareStatement(LOGIN);
+
+			int idx = 0;
+			pstmt.setString(++idx, usersDTO.getDeviceCode());
+
+			rs = pstmt.executeQuery();
+
+			int result = ResultStatus.INVALIDUSER;
+			
+			if (rs.next()) {
+				
+				String userCode = rs.getString("userCode");
+				if (usersDTO.getUserCode().equals(userCode)) {
+					// 로그인 성공
+					//임시값들은 어떻게할지 생각해보기
+					result = ResultStatus.OK;
+					usersDTO.setUserCode(rs.getString("userCode"));
+					usersDTO.setUserName(rs.getString("userName"));
+					usersDTO.setSessionKey(rs.getString("sessionKey"));
+					usersDTO.setAdmin(rs.getBoolean("isAdmin"));
+					usersDTO.setDeviceStatus(rs.getInt("deviceStatus"));
+					usersDTO.setDeviceCode(rs.getString("deviceCode"));
+					
+					
+				} else {
+					// 존재하지 않는 deviceCode
+					result = ResultStatus.INVALIDDEVICE;
+				}
+			}
+
+			//make return json object
+			try {
+				switch (result) {
+				case ResultStatus.OK:
+					jsonObjResultStatus.put("sessionKey",
+							usersDTO.getSessionKey());
+					//
+					jsonObjResultStatus.put("isAdmin", true);
+					jsonObjResultStatus.put("name", usersDTO.getUserName());
+					jsonResponseObj = JsonUtil.makeJsonResponse("ok",
+							jsonObjResultStatus);
+					break;
+
+				case ResultStatus.INVALIDUSER:
+					jsonObjResultStatus.put("message", "invalid user");
+					jsonResponseObj = JsonUtil.makeJsonResponse("invalidUser",
+							jsonObjResultStatus);
+					break;
+
+				case ResultStatus.INVALIDDEVICE:
+					jsonObjResultStatus.put("message", "invalidDevice");
+					jsonResponseObj = JsonUtil.makeJsonResponse(
+							"invalidDevice", jsonObjResultStatus);
+					break;
+
+				default:
+					break;
+				}
+			} catch (JSONException je) {
+				je.printStackTrace();
+			}
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return jsonResponseObj;
+	}
+}

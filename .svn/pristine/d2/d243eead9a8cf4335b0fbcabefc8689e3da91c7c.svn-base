@@ -1,0 +1,63 @@
+package com.sgen.rp.action;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.sgen.DAO.LogsDAO;
+import com.sgen.DTO.*;
+/**
+ * Servlet implementation class EnterLog
+ */
+@WebServlet("/EnterLog")
+public class EnterLog extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public EnterLog() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		// 기계에 입력하면 바로 보내준다....흠....
+		/*
+		 * 	userCode: String (실패 시 FAIL, OTP로 열렸을 때 OTP/OTP FAIL)
+			deviceCode : String
+			deviceStatus : int(방범모드, 여행모드,?) //device status는 device table에서 받아오긔
+			/enterLog
+		 * 
+		 * */
+		int enterlogIdx = 0;
+		String userCode = request.getParameter("userCode");
+		String deviceCode = request.getParameter("deviceCode");
+		int deviceStatus = 0; //우선 0 으로 설정, 그리고 DB에서 값 가져오기
+		Date enterTime = new Date();
+		int result = 0;
+		//enterTime.toString(); //Fri Apr 06 00:51:59 KST 2012
+		//SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd, hh:mm:ss a"); 
+		//System.out.println("EnterTime : " + dateFormat.format(enterTime).toString()); //2012-04-06, 12:51:59 오전
+		
+		LogsDTO logsDTO = new LogsDTO();
+		LogsDAO logsDAO = new LogsDAO();
+		logsDTO.setEnterlogIdx(enterlogIdx);
+		logsDTO.setUserCode(userCode);
+		logsDTO.setDeviceCode(deviceCode);
+		logsDTO.setDeviceStatus(deviceStatus);
+		//logsDTO.setEnterTime(enterTime);
+		result = logsDAO.addLogs(logsDTO);
+		logsDAO.getLogs();
+	}
+}
